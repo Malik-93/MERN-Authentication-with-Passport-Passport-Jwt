@@ -4,24 +4,33 @@ import { loginUser } from "../../Redux/Actions/authActions";
 import { connect } from 'react-redux';
 import PropTypes from "prop-types";
 import classnames from "classnames";
+import Switch from "react-switch";
+import axios from 'axios';
+import { loginAdmin } from "../../Redux/Actions/Admin/authActions";
 class Login extends Component {
     constructor() {
         super();
         this.state = {
             email: "",
             password: "",
-            errors: {}
+            errors: {},
+            checked: false
         };
+        this.handleChange = this.handleChange.bind(this);
     }
-    
+
     componentDidMount() {
         if (this.props.auth.isAuthenticated) {
             this.props.history.push('/dashboard')
+        } else if (this.props.adminAuth.isAuthenticated) {
+            this.props.history.push('/admin/addProduct')
         }
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.auth.isAuthenticated) {
             this.props.history.push("/dashboard"); // push user to dashboard when they login
+        }  else if(nextProps.adminAuth.isAuthenticated) {
+            this.props.history.push("/admin/addProduct"); // push user to dashboard when they login
         }
         if (nextProps.errors) {
             this.setState({
@@ -29,10 +38,15 @@ class Login extends Component {
             });
         }
     }
+    handleChange() {
+        this.setState({ checked: !this.state.checked });
+    }
+
     onChange = e => {
         this.setState({ [e.target.id]: e.target.value });
     };
-    onSubmit = e => {
+
+    userLogin = e => {
         e.preventDefault();
         const userData = {
             email: this.state.email,
@@ -40,8 +54,25 @@ class Login extends Component {
         };
         this.props.loginUser(userData)
     };
+
+    adminLogin = e => {
+        e.preventDefault();
+        const adminData = {
+            email: this.state.email,
+            password: this.state.password
+        };
+        this.props.loginAdmin(adminData)
+    };
+
+    facebookLogin = () => {
+        axios.get('api/users/auth/facebook/callback')
+            .then(res => {
+                console.log(res)
+            })
+            .catch(err => console.log('Facebook login error:', err))
+    }
     render() {
-        console.log(this.props.errors)
+        console.log ( "admin Auth: ", this.props.adminAuth)
         const { errors } = this.state;
         return (
             <div className="container">
@@ -59,7 +90,7 @@ class Login extends Component {
                                 Don't have an account? <Link to="/register">Register</Link>
                             </p>
                         </div>
-                        <form noValidate onSubmit={this.onSubmit}>
+                        <form noValidate onSubmit={ this.state.checked ? this.adminLogin : this.userLogin }>
                             <div className="input-field col s12">
                                 <input
                                     onChange={this.onChange}
@@ -94,6 +125,10 @@ class Login extends Component {
                                     {errors.passwordIncorrect}
                                 </span>
                             </div>
+                            <div className=" col s12" style={{paddingLeft: '11.250px'}}>
+                                <Switch onChange={this.handleChange} checked={this.state.checked} /><br />
+                                <span style={{ paddingBottom: '25px' }}><b>{this.state.checked ? <span>Login as an admin</span> : <span>Login as a user</span>}</b></span>
+                            </div>
                             <div className="col s12" style={{ paddingLeft: "11.250px" }}>
                                 <button
                                     style={{
@@ -109,6 +144,21 @@ class Login extends Component {
                 </button>
                             </div>
                         </form>
+                        <div className="col s12" style={{ paddingLeft: "11.250px" }}>
+                            <button
+                                style={{
+                                    width: "150px",
+                                    borderRadius: "3px",
+                                    letterSpacing: "1.5px",
+                                    marginTop: "1rem"
+                                }}
+                                type="submit"
+                                className="btn btn-large waves-effect waves-light hoverable blue accent-3"
+                                onClick={this.facebookLogin}
+                            >
+                                facebook
+                </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -117,14 +167,16 @@ class Login extends Component {
 }
 Login.propTypes = {
     loginUser: PropTypes.func.isRequired,
+    loginAdmin: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired
 };
 const mapStateToProps = state => ({
     auth: state.auth,
-    errors: state.errors
+    errors: state.errors,
+    adminAuth: state.adminAuthReducer
 });
 export default connect(
     mapStateToProps,
-    { loginUser }
+    { loginUser, loginAdmin }
 )(Login);

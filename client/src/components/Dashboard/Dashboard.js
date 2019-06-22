@@ -2,22 +2,31 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { logoutUser } from "../../Redux/Actions/authActions";
-import axios from 'axios';
+import { getAllProducts, getOneProduct, deleteProduct } from "../../Redux/Actions/productsAction";
+import Loading from "../Loading";
+import { Link } from 'react-router-dom';
+
 class Dashboard extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            products: [],
-            img: ''
+    state = {
+        errorMessage: '',
+        success: ''
+    }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.dbErrors) {
+            this.setState({ errorMessage: nextProps.dbErrors.message })
         }
     }
 
     componentDidMount() {
-        axios.get('/api/products')
-            .then(res => {
-                this.setState({ products: res.data.data })
-            })
-            .catch(err => console.log('Error: ', err))
+        this.props.getAllProducts()
+    }
+    getOneProduct = (id) => {
+        this.props.getOneProduct(id)
+    }
+
+    deleteProduct = (id) => {
+        this.props.deleteProduct(id, this.props.history)
+
     }
 
     onLogoutClick = e => {
@@ -25,53 +34,143 @@ class Dashboard extends Component {
         this.props.logoutUser();
     };
     render() {
-        console.log('State: ', this.state.products)
-        const { user } = this.props.auth;
-        return (
-            <div style={{ height: "75vh" }} className="container valign-wrapper">
-                <div className="row">
-                    <div className="col s12 center-align">
-                        <h4>
-                            <b>Hey there,</b> {user.name.split(" ")[0]}
-                            <p className="flow-text grey-text text-darken-1">
-                                You are logged into a full-stack{" "}
-                                <span style={{ fontFamily: "monospace" }}>MERN</span> app
+        if (this.props.isLoading) {
+            return (
+                <div>
+                    <Loading />
+                </div>
+            )
+        } else {
+            const { user } = this.props.auth;
+            return (
+                <div style={{ height: "75vh" }} className="container valign-wrapper">
+                    {this.state.errorMessage ? alert(this.state.errorMessage) : ''}
+                    <div className="row">
+                        <div className="col s12 center-align">
+                            <h4>
+                                <b>Hey there,</b> { user.name.split(" ")[0] }
+                                <p className="flow-text grey-text text-darken-1">
+                                    You are logged into a full-stack{" "}
+                                    <span style={{ fontFamily: "monospace" }}>MERN</span> app
               </p>
-                        </h4>
+                            </h4>
 
-                        <div>
-                            {this.state.products.map((p, index) => {
-                                return <div key={index}>
-                                    <img src={p.productImage} height='50%' width='50%' />
-                                </div>
-                            })}
-                        </div>
-                        <button
-                            style={{
-                                width: "150px",
-                                borderRadius: "3px",
-                                letterSpacing: "1.5px",
-                                marginTop: "1rem"
-                            }}
-                            onClick={this.onLogoutClick}
-                            className="btn btn-large waves-effect waves-light hoverable blue accent-3"
-                        >
-                            Logout
+                            <div>
+                                {this.props.dbProduct.length > 0 ? this.props.dbProduct.map((product, index) => {
+                                    return <div key={index}>
+                                        <img src={product.productImage} alt='productImg' height='50%' width='50%' onClick={() => this.getOneProduct(product._id)} />
+                                        <span><i className="fa fa-trash-o" style={{ color: 'red' }} onClick={() => this.deleteProduct(product._id)}></i></span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>
+                                                <div>
+                                                    <span>
+                                                        <b>Title: </b>
+                                                    </span>
+                                                    <span>
+                                                        {product.title}
+                                                    </span>
+                                                </div>
+                                                <span><i className="fa fa-edit" style={{ color: 'blue' }}></i></span>
+                                                <span><i className="fa fa-trash-o" style={{ color: 'red' }}></i></span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>
+                                                <div>
+                                                    <span>
+                                                        <b>Description: </b>
+                                                    </span>
+                                                    <span>
+                                                        {product.description}
+                                                    </span>
+                                                </div>
+                                                <span><i className="fa fa-edit" style={{ color: 'blue' }}></i></span>
+                                                <span><i className="fa fa-trash-o" style={{ color: 'red' }}></i></span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>
+                                                <div>
+                                                    <span>
+                                                        <b>Company: </b>
+                                                    </span>
+                                                    <span>
+                                                        {product.company}
+                                                    </span>
+                                                </div>
+                                                <span><i className="fa fa-edit" style={{ color: 'blue' }}></i></span>
+                                                <span><i className="fa fa-trash-o" style={{ color: 'red' }}></i></span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-evenly" }}>
+                                                <div>
+                                                    <span>
+                                                        <b>Price: </b>
+                                                    </span>
+                                                    <span>
+                                                        {product.price}
+                                                    </span>
+                                                </div>
+
+                                                <span><i className="fa fa-edit" style={{ color: 'blue' }}></i></span>
+                                                <span><i className="fa fa-trash-o" style={{ color: 'red' }}></i></span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                })
+                                    : <div><h3>Store is empty</h3></div>
+                                }
+                            </div>
+                            <button
+                                style={{
+                                    width: "150px",
+                                    borderRadius: "3px",
+                                    letterSpacing: "1.5px",
+                                    marginTop: "1rem"
+                                }}
+                                onClick={this.onLogoutClick}
+                                className="btn btn-large waves-effect waves-light hoverable blue accent-3"
+                            >
+                                Logout
             </button>
+
+            <Link to='/users/profile'>
+                            <button
+                                style={{
+                                    width: "150px",
+                                    borderRadius: "3px",
+                                    letterSpacing: "1.5px",
+                                    marginTop: "1rem"
+                                }}
+                                className="btn btn-large waves-effect waves-light hoverable blue accent-3"
+                            >
+                                    Profile
+                            </button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        }
     }
 }
 Dashboard.propTypes = {
     logoutUser: PropTypes.func.isRequired,
-    auth: PropTypes.object.isRequired
+    auth: PropTypes.object.isRequired,
+    dbProduct: PropTypes.array.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    deleteProduct: PropTypes.func.isRequired,
+    getAllProducts: PropTypes.func.isRequired,
+    getOneProduct: PropTypes.func.isRequired,
+    dbErrors: PropTypes.object.isRequired
 };
 const mapStateToProps = state => ({
-    auth: state.auth
+    auth: state.auth,
+    dbProduct: state.productsReducer.products,
+    isLoading: state.productsReducer.isLoading,
+    dbOneProduct: state.productsReducer.oneProduct,
+    dbErrors: state.productsReducer.errors
 });
 export default connect(
     mapStateToProps,
-    { logoutUser }
+    { logoutUser, getAllProducts, getOneProduct, deleteProduct }
 )(Dashboard);
