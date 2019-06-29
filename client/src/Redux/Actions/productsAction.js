@@ -3,9 +3,9 @@ import axios from 'axios';
 import {
     ADD_PRODCUT, PRODUCT_LOADING_START, PRODUCT_LOADING_END, GET_ALL_PRODUCTS, GET_ONE_PRODUCT, DELETE_PRODUCT, GET_ERRORS } from './types'
 
-export const addProduct = (newProduct) => dispatch => {
+export const addProduct = (formData) => dispatch => {
     axios
-        .post('/api/products/addProduct', newProduct)
+        .post('/api/products/addProduct', formData)
         .then(res => {
             dispatch(loadingStart(true))
             dispatch({

@@ -1,9 +1,10 @@
-import { SET_CURRENT_USER, USER_LOADING } from "../Actions/types";
+import { SET_CURRENT_USER, USER_LOADING, EMAIL_SENT_MESSAGE, EMAIL_VERIFICATION_TOKEN } from "../Actions/types";
 const isEmpty = require("is-empty");
 const initialState = {
     isAuthenticated: false,
     user: {},
-    loading: false
+    loading: false,
+    emailVerification: {}    
 };
 export default function (state = initialState, action) {
     switch (action.type) {
@@ -13,6 +14,11 @@ export default function (state = initialState, action) {
                 isAuthenticated: !isEmpty(action.payload),
                 user: action.payload
             };
+            case EMAIL_SENT_MESSAGE:
+                return {
+                    ...state,
+                    emailSentMessage: action.payload
+                }
         case USER_LOADING:
             return {
                 ...state,

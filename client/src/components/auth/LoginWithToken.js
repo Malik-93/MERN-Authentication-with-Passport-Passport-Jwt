@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import classnames from "classnames";
 import Switch from "react-switch";
 import { loginAdmin } from "../../Redux/Actions/Admin/authActions";
-class Login extends Component {
+class LoginWithToken extends Component {
     constructor() {
         super();
         this.state = {
@@ -28,7 +28,7 @@ class Login extends Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.auth.isAuthenticated) {
             this.props.history.push("/dashboard"); // push user to dashboard when they login
-        }  else if(nextProps.adminAuth.isAuthenticated) {
+        } else if (nextProps.adminAuth.isAuthenticated) {
             this.props.history.push("/admin/addProduct"); // push user to dashboard when they login
         }
         if (nextProps.errors) {
@@ -62,10 +62,10 @@ class Login extends Component {
         };
         this.props.loginAdmin(adminData)
     };
-facebookLoginHandle = () => {
-    const token = "EAAE4ZAtC5MQ8BAAAdWqlFMFZBYb0S8sMT5i043KXWHYR7ZAGzTlUkI2TZC3jqQ091PJwHoTtZCv06NvH7ntXPrggIeG8lIqeafM7ZAyihZAOWjWXmktQRrBt8u3v7DvSblL23yTxjgPZCMexWJxBSdlJYZAuvF1ZBvsuDW2A4ZBZA9TXygZDZD"
-    this.props.facebookLogin(token)
-}
+    facebookLoginHandle = () => {
+        const token = "EAAE4ZAtC5MQ8BAAAdWqlFMFZBYb0S8sMT5i043KXWHYR7ZAGzTlUkI2TZC3jqQ091PJwHoTtZCv06NvH7ntXPrggIeG8lIqeafM7ZAyihZAOWjWXmktQRrBt8u3v7DvSblL23yTxjgPZCMexWJxBSdlJYZAuvF1ZBvsuDW2A4ZBZA9TXygZDZD"
+        this.props.facebookLogin(token)
+    }
     render() {
         const { errors } = this.state;
         return (
@@ -84,7 +84,7 @@ facebookLoginHandle = () => {
                                 Don't have an account? <Link to="/register">Register</Link>
                             </p>
                         </div>
-                        <form noValidate onSubmit={ this.state.checked ? this.adminLogin : this.userLogin }>
+                        <form noValidate onSubmit={this.state.checked ? this.adminLogin : this.userLogin}>
                             <div className="input-field col s12">
                                 <input
                                     onChange={this.onChange}
@@ -119,7 +119,7 @@ facebookLoginHandle = () => {
                                     {errors.passwordIncorrect}
                                 </span>
                             </div>
-                            <div className=" col s12" style={{paddingLeft: '11.250px'}}>
+                            <div className=" col s12" style={{ paddingLeft: '11.250px' }}>
                                 <Switch onChange={this.handleChange} checked={this.state.checked} /><br />
                                 <span style={{ paddingBottom: '25px' }}><b>{this.state.checked ? <span>Login as an admin</span> : <span>Login as a user</span>}</b></span>
                             </div>
@@ -159,7 +159,7 @@ facebookLoginHandle = () => {
         );
     }
 }
-Login.propTypes = {
+LoginWithToken.propTypes = {
     loginUser: PropTypes.func.isRequired,
     loginAdmin: PropTypes.func.isRequired,
     facebookLogin: PropTypes.func.isRequired,
@@ -174,4 +174,4 @@ const mapStateToProps = state => ({
 export default connect(
     mapStateToProps,
     { loginUser, loginAdmin, facebookLogin }
-)(Login);
+)(LoginWithToken);

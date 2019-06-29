@@ -5,8 +5,8 @@ import { connect } from "react-redux";
 import { registerUser } from "../../Redux/Actions/authActions";
 import classnames from "classnames";
 class Register extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             name: "",
             email: "",
@@ -21,7 +21,7 @@ class Register extends Component {
             this.props.history.push('/dashboard')
         }
     }
-    
+
     componentWillReceiveProps(nextProps) {
         if (nextProps.errors) {
             this.setState({
@@ -40,11 +40,19 @@ class Register extends Component {
             password: this.state.password,
             confPassword: this.state.confPassword
         };
-
-        this.props.registerUser(newUser, this.props.history); 
+        this.props.registerUser(newUser, this.props.history);
+        setTimeout(() => {
+            this.setState({
+                name: "",
+                email: "",
+                password: "",
+                confPassword: "",
+                emailSentMessage: '',
+            })
+        }, 10000);
     };
     render() {
-        console.log('Redux state:', this.props.auth)
+        console.log('Redux state:', this.props.emailVerification)
         const { errors } = this.state;
         return (
             <div className="container">
@@ -119,6 +127,10 @@ class Register extends Component {
                                 <label htmlFor="confPassword">Confirm Password</label>
                                 <span className="red-text">{errors.confPassword}</span>
                             </div>
+                            <div>
+                                <h6 className="green-text" style={{ marginLeft: '15px' }}>{this.props.emailVerification.emailSentMessage}</h6>
+                            <h6></h6>
+                            </div>
                             <div className="col s12" style={{ paddingLeft: "11.250px" }}>
                                 <button
                                     style={{
@@ -132,6 +144,7 @@ class Register extends Component {
                                 >
                                     Sign up
                 </button>
+
                             </div>
                         </form>
                     </div>
@@ -143,12 +156,14 @@ class Register extends Component {
 Register.propTypes = {
     registerUser: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
-    errors: PropTypes.object.isRequired
+    errors: PropTypes.object.isRequired,
+    emailVerification: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
     auth: state.auth,
-    errors: state.errors
+    errors: state.errors,
+    emailVerification: state.auth.emailVerification
 });
 
 export default connect(

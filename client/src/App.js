@@ -14,6 +14,9 @@ import Dashboard from './components/Dashboard/Dashboard';
 import AdminProduct from './components/Admin/Products/addProductForm'
 import UserProfile from './components/User/User-Profile';
 import AdminAddProduct from './components/Private-Routes/Admin-Routes/Add-Product';
+import { setCurrentAdmin } from './Redux/Actions/Admin/authActions';
+import LoginWithToken from './components/auth/LoginWithToken';
+
 class App extends React.Component {
   componentDidMount() {
     // Check for token to keep user logged in
@@ -33,6 +36,12 @@ class App extends React.Component {
         // Redirect to login
         window.location.href = "./login";
       }
+    } else if (localStorage.AdminjwtToken) {
+      const token = localStorage.AdminjwtToken;
+      setAuthToken(token)
+      const decoded = jwt_decode(token)
+      this.props.dispatch(setCurrentAdmin(decoded))
+      // const currentTime = Date.now() / 1000;
     }
   }
   render() {
@@ -44,6 +53,7 @@ class App extends React.Component {
           <Route exact path="/register" component={Register} />
           <Route exact path="/login" component={Login} />
           <Switch>
+          <Route exact path="/login/:token" component={ LoginWithToken } />
              {/* Protected Routes */}
             <PrivateRoute exact path="/dashboard" component={Dashboard} />
             <ProfilePrivateRoute exact path="/users/profile" component={UserProfile} />

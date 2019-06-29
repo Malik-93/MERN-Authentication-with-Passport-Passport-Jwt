@@ -4,7 +4,8 @@ import jwt_decode from "jwt-decode";
 import {
     GET_ERRORS,
     SET_CURRENT_USER,
-    USER_LOADING
+    USER_LOADING,
+    EMAIL_SENT_MESSAGE,
 } from "./types";
 // Register User
 export const registerUser = (userData, history) => dispatch => {
@@ -12,7 +13,12 @@ export const registerUser = (userData, history) => dispatch => {
         .post("/api/users/register", userData)
         .then(res => {
             console.log("Sign Up From client", res.data )
-            history.push("/login") // re-direct to login on successful register
+            dispatch({
+                type: EMAIL_SENT_MESSAGE,
+                payload: res.data.message
+            })
+
+            // history.push("/login") // re-direct to login on successful register
         }) 
         .catch(err =>
             dispatch({
@@ -21,6 +27,15 @@ export const registerUser = (userData, history) => dispatch => {
             })
         );
 };
+export const resendEmailLink = email => dispatch => {
+axios.post('/api/users/resendEmailToken', email)
+.then(res => {
+    console.log(res)
+})
+.catch(err => {
+    console.log(err)
+})
+}
 // Login - get user token
 export const loginUser = userData => dispatch => {
     axios
@@ -44,6 +59,13 @@ export const loginUser = userData => dispatch => {
             })
         );
 };
+export const facebookLogin = (token) => dispatch => {
+    axios.post('http://localhost:5000/api/users/auth/facebook', token)
+        .then(res => {
+            console.log(res)
+        })
+        .catch(err => console.log('Facebook login error:', err))
+}
 // Set logged in user
 export const setCurrentUser = decoded => {
     return {

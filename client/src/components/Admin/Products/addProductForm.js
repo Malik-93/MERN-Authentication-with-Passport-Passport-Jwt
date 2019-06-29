@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 // import classnames from "classnames";
 import { addProduct } from './../../../Redux/Actions/productsAction';
+import { logoutAdmin } from './../../../Redux/Actions/Admin/authActions';
 class AdminProduct extends Component {
     constructor() {
         super();
@@ -12,35 +13,36 @@ class AdminProduct extends Component {
             description: "",
             company: "",
             price: "",
-            productImage: '',
+            productImage: {},
             errors: {}
         };
     }
     onChangeFile = (e) => {
-        this.setState({ [e.target.id]:  e.target.files[0] })
+        this.setState({ [e.target.id]: e.target.files[0] })
     }
     onChange = e => {
         this.setState({ [e.target.id]: e.target.value });
     };
+
     onSubmit = e => {
         e.preventDefault();
-        const data = new FormData()
-        data.append('file', this.state.productImage)
-        const newProduct = {
-            title: this.state.title,
-            description: this.state.description,
-            company: this.state.company,
-            price: this.state.price,
-            productImage: data
-        };
-        console.log('client Product:', newProduct)
-        
-        this.props.addProduct(newProduct);
+        const { title, description, company, price, productImage } = this.state;
+        let formData = new FormData();
+        formData.append('title', title)
+        formData.append('description', description)
+        formData.append('company', company)
+        formData.append('price', price)
+        formData.append('productImage', productImage)
+        this.props.addProduct(formData);
+        this.setState({
+            title: "",
+            description: "",
+            company: "",
+            price: "",
+            productImage: {},
+        })
     };
     render() {
-        // console.log('Client Db Product: ', this.props.dbProduct )
-        // const { errors } = this.state;
-        console.log(this.state.productImage)
         return (
             <div className="container">
                 <div className="row">
@@ -49,12 +51,13 @@ class AdminProduct extends Component {
                             <i className="material-icons left">keyboard_backspace</i> Back to
                             home
             </Link>
+
                         <div className="col s12" style={{ paddingLeft: "11.250px" }}>
                             <h4>
-                                <b>Add New Product</b> 
-              </h4>
+                                <b>Add New Product</b>
+                            </h4>
                         </div>
-                        <form noValidate onSubmit={this.onSubmit} encType="multipart/form-data">
+                        <form noValidate onSubmit={this.onSubmit} >
                             <div className="input-field col s12">
                                 <input
                                     onChange={this.onChange}
@@ -62,9 +65,9 @@ class AdminProduct extends Component {
                                     // error={errors.name}
                                     id="title"
                                     type="text"
-                                    // className={classnames("", {
-                                    //     invalid: errors.name
-                                    // })}
+                                // className={classnames("", {
+                                //     invalid: errors.name
+                                // })}
                                 />
                                 <label htmlFor="title">Title</label>
                                 {/* <span className="red-text">{errors.name}</span> */}
@@ -76,9 +79,9 @@ class AdminProduct extends Component {
                                     // error={errors.email}
                                     id="description"
                                     type="text"
-                                    // className={classnames("", {
-                                    //     invalid: errors.email
-                                    // })}
+                                // className={classnames("", {
+                                //     invalid: errors.email
+                                // })}
                                 />
                                 <label htmlFor="description">Description</label>
                                 {/* <span className="red-text">{errors.email}</span> */}
@@ -90,9 +93,9 @@ class AdminProduct extends Component {
                                     // error={errors.password}
                                     id="company"
                                     type="text"
-                                    // className={classnames("", {
-                                    //     invalid: errors.password
-                                    // })}
+                                // className={classnames("", {
+                                //     invalid: errors.password
+                                // })}
                                 />
                                 <label htmlFor="password">Company</label>
                                 {/* <span className="red-text">{errors.password}</span> */}
@@ -104,15 +107,15 @@ class AdminProduct extends Component {
                                     // error={errors.confPassword}
                                     id="price"
                                     type="text"
-                                    // className={classnames("", {
-                                    //     invalid: errors.confPassword
-                                    // })}
+                                // className={classnames("", {
+                                //     invalid: errors.confPassword
+                                // })}
                                 />
                                 <label htmlFor="Price">Price</label>
                                 {/* <span className="red-text">{errors.confPassword}</span> */}
                             </div>
                             <div className="input-field col s12">
-                                <input type="file" name="productImage" id="productImage" multiple onChange={this.onChangeFile} />
+                                <input type="file" name="productImage" id="productImage" onChange={this.onChangeFile} />
                             </div>
                             <div className="col s12" style={{ paddingLeft: "11.250px" }}>
                                 <button
@@ -129,6 +132,25 @@ class AdminProduct extends Component {
                 </button>
                             </div>
                         </form>
+                        <div className="col s12" style={{ paddingLeft: "11.250px" }}>
+                            <button
+                            onClick={(e) => {
+                                e.preventDefault()
+                                this.props.logoutAdmin()
+                            }
+                        }
+                                style={{
+                                    width: "150px",
+                                    borderRadius: "3px",
+                                    letterSpacing: "1.5px",
+                                    marginTop: "1rem"
+                                }}
+                                type="submit"
+                                className="btn btn-large waves-effect waves-light hoverable red accent-3"
+                            >
+                                Log Out
+                </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -137,8 +159,9 @@ class AdminProduct extends Component {
 }
 AdminProduct.propTypes = {
     addProduct: PropTypes.func.isRequired,
+    logoutAdmin: PropTypes.func.isRequired,
     dbProduct: PropTypes.object.isRequired,
-    errors: PropTypes.object.isRequired,
+    // errors: PropTypes.object.isRequired,
     isLoading: PropTypes.bool.isRequired
 };
 
@@ -150,5 +173,5 @@ const mapStateToProps = state => ({
 
 export default connect(
     mapStateToProps,
-    { addProduct }
+    { addProduct, logoutAdmin }
 )(AdminProduct);
