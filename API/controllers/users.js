@@ -7,7 +7,6 @@ const Token = require('../db/models/Token');
 const keys = require("../config/keys");
 const validateRegisterInput = require('../validation/register');
 const validateLoginInput = require('../validation/login');
-
 exports.REGISTER_USER = (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body)
     if (!isValid) {
@@ -45,22 +44,22 @@ exports.REGISTER_USER = (req, res) => {
                                     const newToken = new Token({ _userId: user._id, token: token })
                                     newToken.save()
                                         .then(userToken => {
-                                            const url = `http://localhost:3000/login/${userToken.token}`
+                                            const url = `http://localhost:5000/api/users//emailConfirmation/${userToken.token}`
                                             const transporter = nodeMailer.createTransport(smtpTransport({
                                                 service: 'gmail',
                                                 host: 'smtp.gmail.com',
                                                 port: 465,
                                                 secure: true,
                                                 auth: {
-                                                    user: 'laherasif@gmail.com',
-                                                    pass: 'mian6565'
+                                                    user: require('../config/keys').gmailAccount,
+                                                    pass: require('../config/keys').gmailPassword
                                                 },
                                                 tls: {
                                                     rejectUnauthorized: false
                                                 }
                                             }));
                                             const mailOptions = {
-                                                from: 'laherasif@gmail.com',
+                                                from: require('../config/keys').gmailAccount,
                                                 to: req.body.email,
                                                 subject: 'Confirm Email',
                                                 html: `Please click this link to confirm your email: <a href="${url}">${url}</a>`
@@ -68,7 +67,7 @@ exports.REGISTER_USER = (req, res) => {
 
                                             transporter.sendMail(mailOptions, (err, info) => {
                                                 if (err) {
-                                                    console.log('Error during send email : ', err )
+                                                    console.log('Error during send email : ', err)
                                                     // return res.status(500).json({ success: false, Error: 'Error During send email' })
                                                 }
                                                 console.log('Email sent success : ', info.response)
@@ -115,7 +114,11 @@ exports.EMAIL_CONFIRM = (req, res, next) => {
                         if (err) {
                             return res.status(500).json({ success: false, Error: 'Error during save verified user :', err })
                         }
-                        return res.json({ Message: 'Email Confirmed Successfully:', token: userToken.token, user, })
+                        return res.json({ 
+                            Message: 'Email Confirmed Successfully:', 
+                            token: userToken.token, 
+                            user,
+                     })
                     })
                 })
         })
@@ -172,14 +175,14 @@ exports.RESEND_EMAIL_CONFIRMATION = (req, res, next) => {
                             html: `Please click this link to confirm your email: <a href="${url}">${url}</a>`
                         }
                         transporter.sendMail(mailOptions, (err, info) => {
-                            if(err) {
-                                console.log('Error during email send :', err )
+                            if (err) {
+                                console.log('Error during email send :', err)
                             }
                             console.log('Email sent success : ', info.response)
                         })
                         console.log('Token saved successfully :', usertoken.token)
                     })
-                    res.status(201).json({ success: true, message: `An Email Link has been sent to your email: ${req.body.email} please verify your email for Login!`, data: user, token: userToken.token })
+                res.status(201).json({ success: true, message: `An Email Link has been sent to your email: ${req.body.email} please verify your email for Login!`, data: user, token: userToken.token })
             })
 
         })
@@ -216,6 +219,21 @@ exports.LOGIN_USER = (req, res) => {
         .catch(err => {
             res.status(500).json({ success: false, Error: 'Internal server error during sign in uesr: ', err })
         })
+}
+
+exports.ADD_USER_COOKIE = (req, res, next) => {
+    const user = req.body.user
+    res.cookie('User', user, { maxAge: 300, httpOnly: true } )
+    return res.status(200).json({ message: 'Cookie set successfully :', user  })
+}
+
+exports.GET_USER_COOKIE = (req, res, next) => {
+    console.log(req.cookies)
+    const user = req.cookies['user']
+    if (user) {
+        return res.status(200).json({ success: true, message: user})
+    }
+    return res.status(404).json({ message: 'Cookie not found' })
 }
 
 exports.FACEBOOK_LOGIN_TOKEN = (req, res, next) => {

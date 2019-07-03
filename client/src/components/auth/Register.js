@@ -129,7 +129,6 @@ class Register extends Component {
                             </div>
                             <div>
                                 <h6 className="green-text" style={{ marginLeft: '15px' }}>{this.props.emailVerification.emailSentMessage}</h6>
-                            <h6></h6>
                             </div>
                             <div className="col s12" style={{ paddingLeft: "11.250px" }}>
                                 <button

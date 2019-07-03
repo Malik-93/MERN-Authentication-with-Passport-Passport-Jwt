@@ -1,4 +1,5 @@
-import { SET_CURRENT_USER, USER_LOADING, EMAIL_SENT_MESSAGE, EMAIL_VERIFICATION_TOKEN } from "../Actions/types";
+//, EMAIL_VERIFICATION_TOKEN
+import { SET_CURRENT_USER, USER_LOADING, EMAIL_SENT_MESSAGE } from "../Actions/types";
 const isEmpty = require("is-empty");
 const initialState = {
     isAuthenticated: false,
