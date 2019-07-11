@@ -13,6 +13,7 @@
   "author": "Mudassir-Auth",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "concurrently": "^4.1.0",
@@ -22,6 +23,7 @@
     "express-session": "^1.16.2",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
+    "messagebird": "^2.4.1",
     "mongoose": "^5.5.14",
     "multer": "^1.4.1",
     "nodemailer": "^6.2.1",
